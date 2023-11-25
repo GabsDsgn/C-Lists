@@ -33,7 +33,7 @@ Este é um jogo simples de Torre de Hanoi implementado em C. O jogo utiliza uma 
 
 ## Requisitos
 
-- Compilador C (ex: GCC)
+- Compilador C (ex: GCC, DEV C++)
 
 ## Como Contribuir
 
