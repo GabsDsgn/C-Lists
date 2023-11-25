@@ -1,7 +1,6 @@
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <locale.h>  // Adicionado para suporte a localização
+#include <locale.h>
 
 typedef struct Node {
     int data;
@@ -82,90 +81,104 @@ int isDefeat(Stack* towerA, Stack* towerB, Stack* towerC) {
     return (towerA->top == NULL && towerB->top == NULL && towerC->top == NULL);
 }
 
-void moveDisc(Stack* source, Stack* target) {
+void moveDisc(Stack* source, Stack* target, int* moveCount) {
     int disk = pop(source);
     push(target, disk);
+    (*moveCount)++;
 }
 
 int main() {
-    setlocale(LC_ALL, "Portuguese_Brazil.1252");  // Configurar a localização
+    setlocale(LC_ALL, "Portuguese_Brazil.1252");
 
-    Stack towerA, towerB, towerC;
+    int continuarJogando = 1; // Variável para controle do loop principal
 
-    initializeStack(&towerA);
-    initializeStack(&towerB);
-    initializeStack(&towerC);
+    while (continuarJogando) {
+        Stack towerA, towerB, towerC;
 
-    int numDiscs = 3;
-    for (int i = numDiscs; i > 0; --i) {
-        push(&towerA, i);
-    }
+        initializeStack(&towerA);
+        initializeStack(&towerB);
+        initializeStack(&towerC);
 
-    while (1) {
-        printTowers(&towerA, &towerB, &towerC);
-
-        // Verificar condições de vitória ou derrota
-        if (isVictory(&towerC, numDiscs)) {
-            printf("Parabéns! Você venceu!\n");
-            break;
+        int numDiscs = 3;
+        for (int i = numDiscs; i > 0; --i) {
+            push(&towerA, i);
         }
 
-        if (isDefeat(&towerA, &towerB, &towerC)) {
-            printf("Game Over! Você perdeu!\n");
-            break;
+        int moveCount = 0; // Contador de movimentos
+
+        while (1) {
+            printTowers(&towerA, &towerB, &towerC);
+
+            // Verificar condições de vitória ou derrota
+            if (isVictory(&towerC, numDiscs)) {
+                printf("Parabéns! Você venceu em %d movimentos!\n", moveCount);
+                break;
+            }
+
+            if (isDefeat(&towerA, &towerB, &towerC)) {
+                printf("Game Over! Você perdeu!\n");
+                break;
+            }
+
+            // Solicitar a jogada do jogador
+            printf("Escolha a torre de origem (A, B, C): ");
+            char sourceTower;
+            scanf(" %c", &sourceTower);
+
+            printf("Escolha a torre de destino (A, B, C): ");
+            char targetTower;
+            scanf(" %c", &targetTower);
+
+            Stack* source = NULL;
+            Stack* target = NULL;
+
+            // Atribuir as torres escolhidas
+            switch (sourceTower) {
+                case 'A':
+                    source = &towerA;
+                    break;
+                case 'B':
+                    source = &towerB;
+                    break;
+                case 'C':
+                    source = &towerC;
+                    break;
+                default:
+                    printf("Torre de origem inválida!\n");
+                    continue;
+            }
+
+            switch (targetTower) {
+                case 'A':
+                    target = &towerA;
+                    break;
+                case 'B':
+                    target = &towerB;
+                    break;
+                case 'C':
+                    target = &towerC;
+                    break;
+                default:
+                    printf("Torre de destino inválida!\n");
+                    continue;
+            }
+
+            // Realizar o movimento se válido
+            if (source->top == NULL) {
+                printf("Erro: A torre de origem está vazia!\n");
+            } else if (target->top != NULL && source->top->data > target->top->data) {
+                printf("Erro: Movimento inválido! O disco não pode ser colocado sobre um disco menor.\n");
+            } else {
+                moveDisc(source, target, &moveCount);
+            }
         }
 
-        // Solicitar a jogada do jogador
-        printf("Escolha a torre de origem (A, B, C): ");
-        char sourceTower;
-        scanf(" %c", &sourceTower);
+        // Perguntar ao jogador se deseja continuar jogando
+        printf("Deseja continuar jogando? (1 - Sim, 0 - Não): ");
+        scanf("%d", &continuarJogando);
 
-        printf("Escolha a torre de destino (A, B, C): ");
-        char targetTower;
-        scanf(" %c", &targetTower);
-
-        Stack* source = NULL;
-        Stack* target = NULL;
-
-        // Atribuir as torres escolhidas
-        switch (sourceTower) {
-            case 'A':
-                source = &towerA;
-                break;
-            case 'B':
-                source = &towerB;
-                break;
-            case 'C':
-                source = &towerC;
-                break;
-            default:
-                printf("Torre de origem inválida!\n");
-                continue;
-        }
-
-        switch (targetTower) {
-            case 'A':
-                target = &towerA;
-                break;
-            case 'B':
-                target = &towerB;
-                break;
-            case 'C':
-                target = &towerC;
-                break;
-            default:
-                printf("Torre de destino inválida!\n");
-                continue;
-        }
-
-        // Realizar o movimento se válido
-        if (source->top == NULL) {
-            printf("Erro: A torre de origem está vazia!\n");
-        } else if (target->top != NULL && source->top->data > target->top->data) {
-            printf("Erro: Movimento inválido! O disco não pode ser colocado sobre um disco menor.\n");
-        } else {
-            moveDisc(source, target);
-        }
+        // Limpar o buffer de entrada para evitar problemas com scanf
+        while (getchar() != '\n');
     }
 
     return 0;
